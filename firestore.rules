@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isValidBook(data) {
+      let hasValidTitle = data.title is string &&
+                          data.title.trim().size() > 0 &&
+                          data.title.size() <= 100;
+
+      let hasValidAuthor = data.author is string &&
+                           data.author.trim().size() > 0 &&
+                           data.author.size() <= 60;
+
+      let hasValidGenre = data.genre in ['Fiction', 'Non-Fiction', 'Academic', 'Other'];
+
+      let hasValidStatus = data.status in ['To Read', 'Reading', 'Finished'];
+
+      let hasValidRating = !('rating' in data) ||
+                           data.rating == null ||
+                           (data.rating is int && data.rating >= 0 && data.rating <= 5);
+
+      let hasValidFavorite = !('favorite' in data) || data.favorite is bool;
+
+      let hasValidNotes = !('notes' in data) ||
+                          data.notes == null ||
+                          (data.notes is string && data.notes.size() <= 300);
+
+      return hasValidTitle &&
+             hasValidAuthor &&
+             hasValidGenre &&
+             hasValidStatus &&
+             hasValidRating &&
+             hasValidFavorite &&
+             hasValidNotes;
+    }
+
+    match /books/{bookId} {
+      // Logged in user can only read their own books
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Logged in user can only create books where userId matches their auth uid
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       isValidBook(request.resource.data);
+
+      // Logged in user can only update their own books
+      allow update: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.userId == request.auth.uid &&
+                       isValidBook(request.resource.data);
+
+      // Logged in user can only delete their own books
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+  }
+}
+
