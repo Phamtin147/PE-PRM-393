@@ -18,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _submitted = false;
   bool _isLoading = false;
+  bool _obscurePassword = true;
   String? _firebaseError;
 
   @override
@@ -101,6 +102,9 @@ class _LoginScreenState extends State<LoginScreen> {
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
+                enableSuggestions: false,
+                autocorrect: false,
+                autofillHints: const [AutofillHints.oneTimeCode],
                 decoration: const InputDecoration(
                   labelText: 'Email',
                   prefixIcon: Icon(Icons.email_outlined),
@@ -120,11 +124,24 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: _obscurePassword,
+                enableSuggestions: false,
+                autocorrect: false,
+                autofillHints: const [AutofillHints.oneTimeCode],
+                decoration: InputDecoration(
                   labelText: 'Password',
-                  prefixIcon: Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {

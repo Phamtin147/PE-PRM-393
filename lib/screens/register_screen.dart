@@ -19,6 +19,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _submitted = false;
   bool _isLoading = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   String? _firebaseError;
   String? _successMessage;
 
@@ -121,6 +123,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
+                enableSuggestions: false,
+                autocorrect: false,
+                autofillHints: const [AutofillHints.oneTimeCode],
                 decoration: const InputDecoration(
                   labelText: 'Email',
                   prefixIcon: Icon(Icons.email_outlined),
@@ -140,11 +145,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: _obscurePassword,
+                enableSuggestions: false,
+                autocorrect: false,
+                autofillHints: const [AutofillHints.oneTimeCode],
+                decoration: InputDecoration(
                   labelText: 'Password',
-                  prefixIcon: Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -159,11 +177,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: _obscureConfirmPassword,
+                enableSuggestions: false,
+                autocorrect: false,
+                autofillHints: const [AutofillHints.oneTimeCode],
+                decoration: InputDecoration(
                   labelText: 'Confirm Password',
-                  prefixIcon: Icon(Icons.lock_reset_outlined),
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock_reset_outlined),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                      });
+                    },
+                  ),
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {

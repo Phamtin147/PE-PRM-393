@@ -17,6 +17,8 @@ class _ListScreenState extends State<ListScreen> {
   final _authService = AuthService();
   final _bookService = BookService();
 
+  Stream<List<Book>>? _booksStream;
+
   // Add Book Form Controllers & State
   final _addFormKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
@@ -27,6 +29,7 @@ class _ListScreenState extends State<ListScreen> {
   String? _selectedStatus;
   bool _addSubmitted = false;
   bool _isAdding = false;
+  int _formResetCount = 0;
   String? _addSuccessMessage;
   String? _addErrorMessage;
 
@@ -34,12 +37,17 @@ class _ListScreenState extends State<ListScreen> {
   String _selectedGenreFilter = 'All';
   String _selectedStatusFilter = 'All';
   bool _favoritesOnly = false;
+  int _filterResetCount = 0;
   final _searchController = TextEditingController();
   String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
+    final user = _authService.currentUser;
+    if (user != null) {
+      _booksStream = _bookService.getBooksStream(user.uid);
+    }
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text.trim().toLowerCase();
@@ -114,6 +122,7 @@ class _ListScreenState extends State<ListScreen> {
         _selectedStatus = null;
         _addSubmitted = false;
         _addErrorMessage = null;
+        _formResetCount++;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -148,6 +157,7 @@ class _ListScreenState extends State<ListScreen> {
       _favoritesOnly = false;
       _searchController.clear();
       _searchQuery = '';
+      _filterResetCount++;
     });
   }
 
@@ -182,6 +192,10 @@ class _ListScreenState extends State<ListScreen> {
     final user = _authService.currentUser;
     final userEmail = user?.email ?? 'Unknown User';
 
+    if (_booksStream == null && user != null) {
+      _booksStream = _bookService.getBooksStream(user.uid);
+    }
+
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -203,9 +217,9 @@ class _ListScreenState extends State<ListScreen> {
         body: user == null
             ? const Center(child: CircularProgressIndicator())
             : StreamBuilder<List<Book>>(
-                stream: _bookService.getBooksStream(user.uid),
+                stream: _booksStream,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
+                  if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
@@ -296,7 +310,7 @@ class _ListScreenState extends State<ListScreen> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                key: ValueKey('genre_$_selectedGenre'),
+                key: ValueKey('add_genre_$_formResetCount'),
                 initialValue: _selectedGenre,
                 decoration: const InputDecoration(
                   labelText: 'Genre',
@@ -324,7 +338,7 @@ class _ListScreenState extends State<ListScreen> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                key: ValueKey('status_$_selectedStatus'),
+                key: ValueKey('add_status_$_formResetCount'),
                 initialValue: _selectedStatus,
                 decoration: const InputDecoration(
                   labelText: 'Status',
@@ -486,7 +500,7 @@ class _ListScreenState extends State<ListScreen> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    key: ValueKey('filter_genre_$_selectedGenreFilter'),
+                    key: ValueKey('filter_genre_$_filterResetCount'),
                     initialValue: _selectedGenreFilter,
                     decoration: const InputDecoration(
                       labelText: 'Genre',
@@ -507,7 +521,7 @@ class _ListScreenState extends State<ListScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    key: ValueKey('filter_status_$_selectedStatusFilter'),
+                    key: ValueKey('filter_status_$_filterResetCount'),
                     initialValue: _selectedStatusFilter,
                     decoration: const InputDecoration(
                       labelText: 'Status',
