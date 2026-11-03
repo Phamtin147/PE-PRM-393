@@ -146,6 +146,7 @@ class _DetailScreenState extends State<DetailScreen> {
               backgroundColor: const Color(0xFFFF3B30),
               foregroundColor: Colors.white,
               minimumSize: const Size(90, 40),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('Delete', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -171,19 +172,24 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFBFBFD),
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Recipe' : _recipe.name),
+        title: Text(
+          _isEditing ? 'Edit Recipe' : _recipe.name,
+          overflow: TextOverflow.ellipsis,
+        ),
         actions: [
           if (!_isEditing) ...[
             IconButton(
               icon: Icon(
-                _recipe.favorite ? Icons.star : Icons.star_border,
-                color: _recipe.favorite ? const Color(0xFFFF9500) : Colors.white,
+                _recipe.favorite ? Icons.star_rounded : Icons.star_outline_rounded,
+                color: _recipe.favorite ? const Color(0xFFFF9500) : const Color(0xFF86868B),
+                size: 26,
               ),
               onPressed: _toggleFavorite,
             ),
             IconButton(
-              icon: const Icon(Icons.edit_outlined),
+              icon: const Icon(Icons.edit_outlined, size: 22),
               onPressed: () {
                 _initControllers();
                 setState(() {
@@ -194,20 +200,25 @@ class _DetailScreenState extends State<DetailScreen> {
               },
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outline),
+              icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFFF3B30), size: 22),
               onPressed: _handleDelete,
             ),
           ],
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
         child: _isEditing ? _buildEditForm() : _buildViewMode(),
       ),
     );
   }
 
   Widget _buildViewMode() {
+    const primaryColor = Color(0xFF0071E3);
+    const inkColor = Color(0xFF1D1D1F);
+    const secondaryInk = Color(0xFF6E6E73);
+    const hairline = Color(0xFFE5E5EA);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -215,9 +226,16 @@ class _DetailScreenState extends State<DetailScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE5E5EA), width: 1),
+            border: Border.all(color: hairline, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(22.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -228,18 +246,19 @@ class _DetailScreenState extends State<DetailScreen> {
                     child: Text(
                       _recipe.name,
                       style: const TextStyle(
-                        fontSize: 26,
+                        fontSize: 24,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.5,
-                        color: Color(0xFF1D1D1F),
+                        color: inkColor,
+                        height: 1.2,
                       ),
                     ),
                   ),
                   if (_recipe.favorite)
-                    const Icon(Icons.star, color: Color(0xFFFF9500), size: 28),
+                    const Icon(Icons.star_rounded, color: Color(0xFFFF9500), size: 28),
                 ],
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -247,49 +266,71 @@ class _DetailScreenState extends State<DetailScreen> {
                   _buildDetailBadge(
                     icon: Icons.timer_outlined,
                     label: '${_recipe.cookTime} min',
-                    color: const Color(0xFF0071E3),
+                    color: primaryColor,
+                    bgColor: const Color(0xFFE8F2FD),
                   ),
                   _buildDetailBadge(
-                    icon: Icons.restaurant,
+                    icon: Icons.restaurant_rounded,
                     label: _recipe.category,
-                    color: const Color(0xFF1D1D1F),
+                    color: inkColor,
+                    bgColor: const Color(0xFFF5F5F7),
                   ),
                   _buildDetailBadge(
-                    icon: Icons.speed,
+                    icon: Icons.speed_rounded,
                     label: _recipe.difficulty,
                     color: _getDifficultyColor(_recipe.difficulty),
+                    bgColor: _getDifficultyColor(_recipe.difficulty).withValues(alpha: 0.1),
                   ),
                   if (_recipe.servings != null)
                     _buildDetailBadge(
-                      icon: Icons.people_outline,
+                      icon: Icons.people_outline_rounded,
                       label: '${_recipe.servings} servings',
                       color: const Color(0xFF5856D6),
+                      bgColor: const Color(0xFFF3F0FF),
                     ),
                 ],
               ),
               const SizedBox(height: 24),
-              const Divider(color: Color(0xFFE5E5EA)),
-              const SizedBox(height: 16),
-              const Text(
-                'Notes',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.3,
-                  color: Color(0xFF1D1D1F),
-                ),
+              const Divider(color: hairline, height: 1),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  const Icon(Icons.notes_rounded, size: 18, color: secondaryInk),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Notes',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2,
+                      color: inkColor,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                (_recipe.notes != null && _recipe.notes!.trim().isNotEmpty)
-                    ? _recipe.notes!
-                    : 'No notes provided for this recipe.',
-                style: TextStyle(
-                  fontSize: 15,
-                  height: 1.45,
-                  color: (_recipe.notes != null && _recipe.notes!.trim().isNotEmpty)
-                      ? const Color(0xFF424245)
-                      : const Color(0xFF86868B),
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF9F9FB),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFEFEFF4)),
+                ),
+                child: Text(
+                  (_recipe.notes != null && _recipe.notes!.trim().isNotEmpty)
+                      ? _recipe.notes!
+                      : 'No notes provided for this recipe.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.5,
+                    color: (_recipe.notes != null && _recipe.notes!.trim().isNotEmpty)
+                        ? const Color(0xFF2C2C2E)
+                        : const Color(0xFF86868B),
+                    fontStyle: (_recipe.notes != null && _recipe.notes!.trim().isNotEmpty)
+                        ? FontStyle.normal
+                        : FontStyle.italic,
+                  ),
                 ),
               ),
             ],
@@ -303,17 +344,18 @@ class _DetailScreenState extends State<DetailScreen> {
     required IconData icon,
     required String label,
     required Color color,
+    required Color bgColor,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: color),
+          Icon(icon, size: 15, color: color),
           const SizedBox(width: 6),
           Text(
             label,
@@ -329,11 +371,21 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Widget _buildEditForm() {
+    const inkColor = Color(0xFF1D1D1F);
+    const hairline = Color(0xFFE5E5EA);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E5EA), width: 1),
+        border: Border.all(color: hairline, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(20.0),
       child: Form(
@@ -347,13 +399,13 @@ class _DetailScreenState extends State<DetailScreen> {
             const Text(
               'Edit Recipe Details',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w700,
-                letterSpacing: -0.4,
-                color: Color(0xFF1D1D1F),
+                letterSpacing: -0.3,
+                color: inkColor,
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(labelText: 'Name'),
@@ -367,7 +419,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _selectedCategory,
               decoration: const InputDecoration(labelText: 'Category'),
@@ -390,7 +442,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _selectedDifficulty,
               decoration: const InputDecoration(labelText: 'Difficulty'),
@@ -413,7 +465,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             TextFormField(
               controller: _cookTimeController,
               keyboardType: TextInputType.number,
@@ -429,7 +481,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             TextFormField(
               controller: _servingsController,
               keyboardType: TextInputType.number,
@@ -444,7 +496,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             TextFormField(
               controller: _notesController,
               maxLines: 2,
@@ -459,19 +511,19 @@ class _DetailScreenState extends State<DetailScreen> {
             const SizedBox(height: 20),
             if (_errorMessage != null) ...[
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFF3B30).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: const Color(0xFFFF3B30).withValues(alpha: 0.3),
+                    color: const Color(0xFFFF3B30).withValues(alpha: 0.25),
                   ),
                 ),
                 child: Text(
                   _errorMessage!,
                   style: const TextStyle(
                     color: Color(0xFFFF3B30),
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
                   textAlign: TextAlign.center,
@@ -493,16 +545,19 @@ class _DetailScreenState extends State<DetailScreen> {
                           },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: const BorderSide(color: Color(0xFFD2D2D7)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(980)),
+                      side: const BorderSide(color: hairline),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    child: const Text('Cancel', style: TextStyle(color: Color(0xFF1D1D1F))),
+                    child: const Text('Cancel', style: TextStyle(color: Color(0xFF1D1D1F), fontWeight: FontWeight.w600)),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _handleSave,
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
                     child: _isLoading
                         ? const SizedBox(
                             height: 20,
