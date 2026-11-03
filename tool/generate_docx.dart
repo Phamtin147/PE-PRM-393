@@ -64,7 +64,7 @@ void main() {
             </w:tcMar>
           </w:tcPr>
           <w:p>
-            <w:r><w:t>Student Code: QE190087  Full Name: Pham Trung Tin  GitHub Repository URL: https://github.com/Phamtin147/PE-PRM-393  APK Download Link: https://github.com/Phamtin147/PE-PRM-393/releases/download/v1.0/app-release.apk  Firebase Project ID: pe-prn-393  Test account email: grader.qe190087@example.com  Test account password: Test1234!</w:t></w:r>
+            <w:r><w:t>Student Code: QE190087  Full Name: Pham Trung Tin  GitHub Repository URL: https://github.com/Phamtin147/PE-PRM-393  APK Download Link: https://github.com/Phamtin147/PE-PRM-393/releases/download/v1.0/app-release.apk  Firebase Project ID: pe-prn-393-79796  Test account email: grader.qe190087@example.com  Test account password: Test1234!</w:t></w:r>
           </w:p>
         </w:tc>
       </w:tr>

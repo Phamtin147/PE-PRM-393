@@ -50,19 +50,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCfQSx4_mgNe90N-h0OwxSEcAPHD4Exj-4',
-    appId: '1:46367504512:android:519248c52fccd066a60e65',
-    messagingSenderId: '46367504512',
-    projectId: 'pe-prn-393',
-    storageBucket: 'pe-prn-393.firebasestorage.app',
+    apiKey: 'AIzaSyCkbL2O4WttSGM1Jgzfa_cCSGay6QmUBdE',
+    appId: '1:465580447947:android:f2505585c017d3bef5a34e',
+    messagingSenderId: '465580447947',
+    projectId: 'pe-prn-393-79796',
+    storageBucket: 'pe-prn-393-79796.firebasestorage.app',
   );
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAr35bKVlcB_DoIxHqjum28ANbMs-X3OFE',
-    appId: '1:46367504512:web:ba51d08fd9f903bda60e65',
-    messagingSenderId: '46367504512',
-    projectId: 'pe-prn-393',
-    authDomain: 'pe-prn-393.firebaseapp.com',
-    storageBucket: 'pe-prn-393.firebasestorage.app',
-    measurementId: 'G-L0STGJN9XM',
+    apiKey: 'AIzaSyANoeYPdtJY0oFOxc1yqm7EYY4gjs4KIxo',
+    appId: '1:465580447947:web:b21e39b0742b90b3f5a34e',
+    messagingSenderId: '465580447947',
+    projectId: 'pe-prn-393-79796',
+    authDomain: 'pe-prn-393-79796.firebaseapp.com',
+    storageBucket: 'pe-prn-393-79796.firebasestorage.app',
+    measurementId: 'G-8LWSGEZ5M2',
   );
 }

@@ -8,8 +8,8 @@ import 'dart:io';
 ///   dart run tool/clean_firebase.dart [collectionName]
 /// Mặc định collectionName là 'recipes'.
 
-const String apiKey = 'AIzaSyAr35bKVlcB_DoIxHqjum28ANbMs-X3OFE';
-const String projectId = 'pe-prn-393';
+const String apiKey = 'AIzaSyANoeYPdtJY0oFOxc1yqm7EYY4gjs4KIxo';
+const String projectId = 'pe-prn-393-79796';
 const String defaultEmail = 'grader.qe190087@example.com';
 const String defaultPassword = 'Test1234!';
 

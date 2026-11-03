@@ -7,7 +7,7 @@ RecipeBox is a mobile application developed in Flutter & Firebase for the PRM393
 - **Full Name:** Pham Trung Tin
 - **Repository URL:** `https://github.com/Phamtin147/PE-PRM-393`
 - **Release APK Link:** `https://github.com/Phamtin147/PE-PRM-393/releases/download/v1.0/app-release.apk`
-- **Firebase Project ID:** `pe-prn-393`
+- **Firebase Project ID:** `pe-prn-393-79796`
 - **Grader Test Account:** `grader.qe190087@example.com` / `Test1234!`
 
 ## Architecture & Features
