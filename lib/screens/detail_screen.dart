@@ -1,66 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/book.dart';
-import '../services/book_service.dart';
+import '../models/recipe.dart';
+import '../services/recipe_service.dart';
 
 class DetailScreen extends StatefulWidget {
-  final Book book;
+  final Recipe recipe;
 
-  const DetailScreen({super.key, required this.book});
+  const DetailScreen({super.key, required this.recipe});
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();
 }
 
 class _DetailScreenState extends State<DetailScreen> {
-  late Book _book;
-  final _bookService = BookService();
+  late Recipe _recipe;
+  final _recipeService = RecipeService();
   bool _isEditing = false;
   bool _isLoading = false;
   String? _errorMessage;
 
   // Edit form controllers
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _titleController;
-  late TextEditingController _authorController;
-  late TextEditingController _ratingController;
+  late TextEditingController _nameController;
+  late TextEditingController _cookTimeController;
+  late TextEditingController _servingsController;
   late TextEditingController _notesController;
-  String? _selectedGenre;
-  String? _selectedStatus;
+  String? _selectedCategory;
+  String? _selectedDifficulty;
   bool _editSubmitted = false;
 
   @override
   void initState() {
     super.initState();
-    _book = widget.book;
+    _recipe = widget.recipe;
     _initControllers();
   }
 
   void _initControllers() {
-    _titleController = TextEditingController(text: _book.title);
-    _authorController = TextEditingController(text: _book.author);
-    _ratingController = TextEditingController(
-      text: _book.rating != null ? _book.rating.toString() : '',
+    _nameController = TextEditingController(text: _recipe.name);
+    _cookTimeController = TextEditingController(text: _recipe.cookTime.toString());
+    _servingsController = TextEditingController(
+      text: _recipe.servings != null ? _recipe.servings.toString() : '',
     );
-    _notesController = TextEditingController(text: _book.notes ?? '');
-    _selectedGenre = _book.genre;
-    _selectedStatus = _book.status;
+    _notesController = TextEditingController(text: _recipe.notes ?? '');
+    _selectedCategory = _recipe.category;
+    _selectedDifficulty = _recipe.difficulty;
   }
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _authorController.dispose();
-    _ratingController.dispose();
+    _nameController.dispose();
+    _cookTimeController.dispose();
+    _servingsController.dispose();
     _notesController.dispose();
     super.dispose();
   }
 
   Future<void> _toggleFavorite() async {
     try {
-      await _bookService.toggleFavorite(_book.id, _book.favorite);
+      await _recipeService.toggleFavorite(_recipe.id, _recipe.favorite);
       setState(() {
-        _book = _book.copyWith(favorite: !_book.favorite);
+        _recipe = _recipe.copyWith(favorite: !_recipe.favorite);
       });
     } catch (e) {
       if (!mounted) return;
@@ -85,30 +85,36 @@ class _DetailScreenState extends State<DetailScreen> {
     });
 
     try {
-      final rating = _ratingController.text.trim().isNotEmpty
-          ? int.tryParse(_ratingController.text.trim())
+      final cookTime = int.parse(_cookTimeController.text.trim());
+      final servings = _servingsController.text.trim().isNotEmpty
+          ? int.tryParse(_servingsController.text.trim())
           : null;
 
-      final updatedBook = _book.copyWith(
-        title: _titleController.text.trim(),
-        author: _authorController.text.trim(),
-        genre: _selectedGenre,
-        status: _selectedStatus,
-        rating: rating,
-        notes: _notesController.text.trim(),
+      final updatedRecipe = _recipe.copyWith(
+        name: _nameController.text.trim(),
+        category: _selectedCategory,
+        difficulty: _selectedDifficulty,
+        cookTime: cookTime,
+        servings: servings,
+        notes: _notesController.text.trim().isNotEmpty
+            ? _notesController.text.trim()
+            : null,
       );
 
-      await _bookService.updateBook(updatedBook);
+      await _recipeService.updateRecipe(updatedRecipe);
 
       if (!mounted) return;
       setState(() {
-        _book = updatedBook;
+        _recipe = updatedRecipe;
         _isEditing = false;
         _isLoading = false;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Book updated successfully')),
+        const SnackBar(
+          content: Text('Recipe updated successfully'),
+          backgroundColor: Color(0xFF34C759),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
@@ -127,20 +133,22 @@ class _DetailScreenState extends State<DetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Book'),
-        content: const Text('Are you sure you want to delete this book?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Delete Recipe', style: TextStyle(fontWeight: FontWeight.w700)),
+        content: const Text('Are you sure you want to delete this recipe?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: const Text('Cancel', style: TextStyle(color: Color(0xFF0071E3), fontWeight: FontWeight.w600)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: const Color(0xFFFF3B30),
               foregroundColor: Colors.white,
+              minimumSize: const Size(90, 40),
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
+            child: const Text('Delete', style: TextStyle(fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -148,13 +156,13 @@ class _DetailScreenState extends State<DetailScreen> {
 
     if (confirmed == true) {
       try {
-        await _bookService.deleteBook(_book.id);
+        await _recipeService.deleteRecipe(_recipe.id);
         if (!mounted) return;
         Navigator.of(context).pop();
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete book: $e')),
+          SnackBar(content: Text('Failed to delete recipe: $e')),
         );
       }
     }
@@ -164,325 +172,367 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Book' : _book.title),
+        title: Text(_isEditing ? 'Edit Recipe' : _recipe.name),
         actions: [
           if (!_isEditing) ...[
             IconButton(
               icon: Icon(
-                _book.favorite ? Icons.star : Icons.star_border,
-                color: _book.favorite ? Colors.amber : Colors.white,
+                _recipe.favorite ? Icons.star : Icons.star_border,
+                color: _recipe.favorite ? const Color(0xFFFF9500) : Colors.white,
               ),
               onPressed: _toggleFavorite,
-              tooltip: 'Favorite',
             ),
             IconButton(
-              icon: const Icon(Icons.edit),
+              icon: const Icon(Icons.edit_outlined),
               onPressed: () {
                 _initControllers();
                 setState(() {
                   _isEditing = true;
-                  _editSubmitted = false;
                   _errorMessage = null;
+                  _editSubmitted = false;
                 });
               },
-              tooltip: 'Edit',
             ),
             IconButton(
-              icon: const Icon(Icons.delete),
+              icon: const Icon(Icons.delete_outline),
               onPressed: _handleDelete,
-              tooltip: 'Delete',
             ),
           ],
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: _isEditing ? _buildEditMode() : _buildViewMode(),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+        child: _isEditing ? _buildEditForm() : _buildViewMode(),
       ),
     );
   }
 
   Widget _buildViewMode() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _book.title,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _book.favorite ? Icons.star : Icons.star_border,
-                        color: _book.favorite ? Colors.amber : Colors.grey,
-                        size: 32,
-                      ),
-                      onPressed: _toggleFavorite,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'by ${_book.author}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-                const Divider(height: 32),
-                _buildDetailRow(Icons.category, 'Genre', _book.genre),
-                const SizedBox(height: 12),
-                _buildDetailRow(Icons.bookmark, 'Status', _book.status),
-                const SizedBox(height: 12),
-                _buildDetailRow(
-                  Icons.star_rate,
-                  'Rating',
-                  _book.rating != null ? '${_book.rating} / 5' : 'No rating',
-                ),
-                const SizedBox(height: 12),
-                _buildDetailRow(
-                  Icons.notes,
-                  'Notes',
-                  (_book.notes != null && _book.notes!.isNotEmpty)
-                      ? _book.notes!
-                      : 'No notes provided',
-                ),
-              ],
-            ),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE5E5EA), width: 1),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDetailRow(IconData icon, String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 20, color: Colors.deepPurple),
-        const SizedBox(width: 12),
-        SizedBox(
-          width: 70,
-          child: Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            value,
-            style: TextStyle(color: Colors.grey.shade800),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEditMode() {
-    return Form(
-      key: _formKey,
-      autovalidateMode: _editSubmitted
-          ? AutovalidateMode.onUserInteraction
-          : AutovalidateMode.disabled,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TextFormField(
-            controller: _titleController,
-            decoration: const InputDecoration(
-              labelText: 'Title',
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Title is required';
-              }
-              if (value.length > 100) {
-                return 'Title must be at most 100 characters';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _authorController,
-            decoration: const InputDecoration(
-              labelText: 'Author',
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Author is required';
-              }
-              if (value.length > 60) {
-                return 'Author must be at most 60 characters';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            initialValue: _selectedGenre,
-            decoration: const InputDecoration(
-              labelText: 'Genre',
-              border: OutlineInputBorder(),
-            ),
-            items: [
-              const DropdownMenuItem(
-                value: '',
-                child: Text('Choose genre'),
-              ),
-              ...Book.genres.map((g) => DropdownMenuItem(value: g, child: Text(g))),
-            ],
-            onChanged: (val) {
-              setState(() {
-                _selectedGenre = (val == null || val.isEmpty) ? null : val;
-              });
-            },
-            validator: (value) {
-              if (value == null || value.isEmpty || value == 'Choose genre') {
-                return 'Please choose a genre';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            initialValue: _selectedStatus,
-            decoration: const InputDecoration(
-              labelText: 'Status',
-              border: OutlineInputBorder(),
-            ),
-            items: [
-              const DropdownMenuItem(
-                value: '',
-                child: Text('Choose status'),
-              ),
-              ...Book.statuses.map((s) => DropdownMenuItem(value: s, child: Text(s))),
-            ],
-            onChanged: (val) {
-              setState(() {
-                _selectedStatus = (val == null || val.isEmpty) ? null : val;
-              });
-            },
-            validator: (value) {
-              if (value == null || value.isEmpty || value == 'Choose status') {
-                return 'Please choose a status';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _ratingController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Rating (optional 0-5)',
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value != null && value.trim().isNotEmpty) {
-                final intVal = int.tryParse(value.trim());
-                if (intVal == null || intVal < 0 || intVal > 5) {
-                  return 'Rating must be a whole number from 0 to 5';
-                }
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _notesController,
-            maxLines: 3,
-            decoration: const InputDecoration(
-              labelText: 'Notes (optional)',
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value != null && value.length > 300) {
-                return 'Notes must be at most 300 characters';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 20),
-          if (_errorMessage != null) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red.shade300),
-              ),
-              child: Text(
-                _errorMessage!,
-                style: TextStyle(color: Colors.red.shade800),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-          Row(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () {
-                          setState(() {
-                            _isEditing = false;
-                            _errorMessage = null;
-                          });
-                        },
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      _recipe.name,
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.5,
+                        color: Color(0xFF1D1D1F),
+                      ),
+                    ),
                   ),
-                  child: const Text('Cancel'),
+                  if (_recipe.favorite)
+                    const Icon(Icons.star, color: Color(0xFFFF9500), size: 28),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildDetailBadge(
+                    icon: Icons.timer_outlined,
+                    label: '${_recipe.cookTime} min',
+                    color: const Color(0xFF0071E3),
+                  ),
+                  _buildDetailBadge(
+                    icon: Icons.restaurant,
+                    label: _recipe.category,
+                    color: const Color(0xFF1D1D1F),
+                  ),
+                  _buildDetailBadge(
+                    icon: Icons.speed,
+                    label: _recipe.difficulty,
+                    color: _getDifficultyColor(_recipe.difficulty),
+                  ),
+                  if (_recipe.servings != null)
+                    _buildDetailBadge(
+                      icon: Icons.people_outline,
+                      label: '${_recipe.servings} servings',
+                      color: const Color(0xFF5856D6),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const Divider(color: Color(0xFFE5E5EA)),
+              const SizedBox(height: 16),
+              const Text(
+                'Notes',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.3,
+                  color: Color(0xFF1D1D1F),
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  onPressed: _isLoading ? null : _handleSave,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Save'),
+              const SizedBox(height: 8),
+              Text(
+                (_recipe.notes != null && _recipe.notes!.trim().isNotEmpty)
+                    ? _recipe.notes!
+                    : 'No notes provided for this recipe.',
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.45,
+                  color: (_recipe.notes != null && _recipe.notes!.trim().isNotEmpty)
+                      ? const Color(0xFF424245)
+                      : const Color(0xFF86868B),
                 ),
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailBadge({
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildEditForm() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E5EA), width: 1),
+      ),
+      padding: const EdgeInsets.all(20.0),
+      child: Form(
+        key: _formKey,
+        autovalidateMode: _editSubmitted
+            ? AutovalidateMode.onUserInteraction
+            : AutovalidateMode.disabled,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Edit Recipe Details',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.4,
+                color: Color(0xFF1D1D1F),
+              ),
+            ),
+            const SizedBox(height: 18),
+            TextFormField(
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: 'Name'),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Name is required';
+                }
+                if (value.length > 80) {
+                  return 'Name must be at most 80 characters';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 14),
+            DropdownButtonFormField<String>(
+              initialValue: _selectedCategory,
+              decoration: const InputDecoration(labelText: 'Category'),
+              items: [
+                const DropdownMenuItem(
+                  value: '',
+                  child: Text('Choose category'),
+                ),
+                ...Recipe.categories.map((c) => DropdownMenuItem(value: c, child: Text(c))),
+              ],
+              onChanged: (val) {
+                setState(() {
+                  _selectedCategory = (val == null || val.isEmpty) ? null : val;
+                });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty || value == 'Choose category') {
+                  return 'Please choose a category';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 14),
+            DropdownButtonFormField<String>(
+              initialValue: _selectedDifficulty,
+              decoration: const InputDecoration(labelText: 'Difficulty'),
+              items: [
+                const DropdownMenuItem(
+                  value: '',
+                  child: Text('Choose difficulty'),
+                ),
+                ...Recipe.difficulties.map((d) => DropdownMenuItem(value: d, child: Text(d))),
+              ],
+              onChanged: (val) {
+                setState(() {
+                  _selectedDifficulty = (val == null || val.isEmpty) ? null : val;
+                });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty || value == 'Choose difficulty') {
+                  return 'Please choose a difficulty';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 14),
+            TextFormField(
+              controller: _cookTimeController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Cook time (minutes)'),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Cook time is required';
+                }
+                final intVal = int.tryParse(value.trim());
+                if (intVal == null || intVal < 1 || intVal > 600) {
+                  return 'Cook time must be a whole number from 1 to 600';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 14),
+            TextFormField(
+              controller: _servingsController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Servings (optional 1-20)'),
+              validator: (value) {
+                if (value != null && value.trim().isNotEmpty) {
+                  final intVal = int.tryParse(value.trim());
+                  if (intVal == null || intVal < 1 || intVal > 20) {
+                    return 'Servings must be a whole number from 1 to 20';
+                  }
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 14),
+            TextFormField(
+              controller: _notesController,
+              maxLines: 2,
+              decoration: const InputDecoration(labelText: 'Notes (optional)'),
+              validator: (value) {
+                if (value != null && value.length > 300) {
+                  return 'Notes must be at most 300 characters';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            if (_errorMessage != null) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF3B30).withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFFF3B30).withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  _errorMessage!,
+                  style: const TextStyle(
+                    color: Color(0xFFFF3B30),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _isLoading
+                        ? null
+                        : () {
+                            setState(() {
+                              _isEditing = false;
+                              _errorMessage = null;
+                            });
+                          },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: const BorderSide(color: Color(0xFFD2D2D7)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(980)),
+                    ),
+                    child: const Text('Cancel', style: TextStyle(color: Color(0xFF1D1D1F))),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleSave,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('Save'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _getDifficultyColor(String difficulty) {
+    switch (difficulty) {
+      case 'Easy':
+        return const Color(0xFF34C759);
+      case 'Medium':
+        return const Color(0xFFFF9500);
+      case 'Hard':
+        return const Color(0xFFFF3B30);
+      default:
+        return const Color(0xFF86868B);
+    }
   }
 }

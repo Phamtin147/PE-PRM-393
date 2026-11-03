@@ -43,7 +43,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0
-          name: "Release v1.0 - PRM393 BookShelf"
+          name: "Release v1.0 - PRM393 RecipeBox"
           body: "Release APK for PRM393 Practical Exam submission by Pham Trung Tin (QE190087)."
           files: build/app/outputs/flutter-apk/app-release.apk
         env:

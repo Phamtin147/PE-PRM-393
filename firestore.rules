@@ -6,56 +6,44 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isValidBook(data) {
-      let hasValidTitle = data.title is string &&
-                          data.title.trim().size() > 0 &&
-                          data.title.size() <= 100;
+    function isValidRecipe(data) {
+      let hasValidName = data.name is string &&
+                         data.name.trim().size() > 0 &&
+                         data.name.size() <= 80;
 
-      let hasValidAuthor = data.author is string &&
-                           data.author.trim().size() > 0 &&
-                           data.author.size() <= 60;
-
-      let hasValidGenre = data.genre in ['Fiction', 'Non-Fiction', 'Academic', 'Other'];
-
-      let hasValidStatus = data.status in ['To Read', 'Reading', 'Finished'];
-
-      let hasValidRating = !('rating' in data) ||
-                           data.rating == null ||
-                           (data.rating is int && data.rating >= 0 && data.rating <= 5);
-
+      let hasValidCategory = data.category in ['Breakfast', 'Lunch', 'Dinner', 'Dessert'];
+      let hasValidDifficulty = data.difficulty in ['Easy', 'Medium', 'Hard'];
+      let hasValidCookTime = data.cookTime is int && data.cookTime >= 1 && data.cookTime <= 600;
+      let hasValidServings = !('servings' in data) || data.servings == null || (data.servings is int && data.servings >= 1 && data.servings <= 20);
       let hasValidFavorite = !('favorite' in data) || data.favorite is bool;
+      let hasValidNotes = !('notes' in data) || data.notes == null || (data.notes is string && data.notes.size() <= 300);
 
-      let hasValidNotes = !('notes' in data) ||
-                          data.notes == null ||
-                          (data.notes is string && data.notes.size() <= 300);
-
-      return hasValidTitle &&
-             hasValidAuthor &&
-             hasValidGenre &&
-             hasValidStatus &&
-             hasValidRating &&
+      return hasValidName &&
+             hasValidCategory &&
+             hasValidDifficulty &&
+             hasValidCookTime &&
+             hasValidServings &&
              hasValidFavorite &&
              hasValidNotes;
     }
 
-    match /books/{bookId} {
-      // Logged in user can only read their own books
+    match /recipes/{recipeId} {
+      // Logged in user can only read their own recipes
       allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
 
-      // Logged in user can only create books where userId matches their auth uid
+      // Logged in user can only create recipes where userId matches their auth uid
       allow create: if isAuthenticated() &&
                        request.resource.data.userId == request.auth.uid &&
-                       isValidBook(request.resource.data);
+                       isValidRecipe(request.resource.data);
 
-      // Logged in user can only update their own books
+      // Logged in user can only update their own recipes
       allow update: if isAuthenticated() &&
                        resource.data.userId == request.auth.uid &&
                        request.resource.data.userId == request.auth.uid &&
-                       isValidBook(request.resource.data);
+                       isValidRecipe(request.resource.data);
 
-      // Logged in user can only delete their own books
+      // Logged in user can only delete their own recipes
       allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
   }
 }
-

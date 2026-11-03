@@ -1,17 +1,17 @@
-# bookshelf
+# RecipeBox (PRM393 - Fall 2026)
 
-A new Flutter project.
+RecipeBox is a mobile application developed in Flutter & Firebase for the PRM393 Practical Exam at FPT University.
 
-## Getting Started
+## Student Information
+- **Student Code:** `QE190087`
+- **Full Name:** Pham Trung Tin
+- **Repository URL:** `https://github.com/Phamtin147/PE-PRM-393`
+- **Release APK Link:** `https://github.com/Phamtin147/PE-PRM-393/releases/download/v1.0/app-release.apk`
+- **Firebase Project ID:** `pe-prn-393`
+- **Grader Test Account:** `grader.qe190087@example.com` / `Test1234!`
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Architecture & Features
+- **Design System:** Apple Design System (iOS HIG) integrated with `tasteskill v2`, `impeccable`, and `ui-ux-pro-max`.
+- **Database:** Cloud Firestore with strict collection rules (`recipes`) and client-side anti-duplicate protection per user.
+- **State Management:** Reactive realtime streams without flickering, memoized in `initState`.
+- **CI/CD:** Automated release APK packaging via GitHub Actions.

@@ -6,7 +6,7 @@ import 'dart:io';
 ///
 /// Cách dùng:
 ///   dart run tool/clean_firebase.dart [collectionName]
-/// Mặc định collectionName là 'books'.
+/// Mặc định collectionName là 'recipes'.
 
 const String apiKey = 'AIzaSyAr35bKVlcB_DoIxHqjum28ANbMs-X3OFE';
 const String projectId = 'pe-prn-393';
@@ -14,7 +14,7 @@ const String defaultEmail = 'grader.qe190087@example.com';
 const String defaultPassword = 'Test1234!';
 
 Future<void> main(List<String> args) async {
-  final collection = args.isNotEmpty ? args[0] : 'books';
+  final collection = args.isNotEmpty ? args[0] : 'recipes';
   final email = args.length > 1 ? args[1] : defaultEmail;
   final password = args.length > 2 ? args[2] : defaultPassword;
 

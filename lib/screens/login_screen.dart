@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
         title: const Text('Login'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
         child: Form(
           key: _formKey,
           autovalidateMode: _submitted
@@ -85,20 +85,24 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 16),
-              Text(
+              const Text(
                 'Welcome Back',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
-                    ),
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
+                  color: Color(0xFF1D1D1F),
+                ),
               ),
               const SizedBox(height: 8),
-              Text(
-                'Sign in to access your private bookshelf',
-                style: TextStyle(color: Colors.grey.shade600),
+              const Text(
+                'Sign in to access your private RecipeBox',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF6E6E73),
+                ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -107,8 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 autofillHints: const [AutofillHints.oneTimeCode],
                 decoration: const InputDecoration(
                   labelText: 'Email',
-                  prefixIcon: Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email_outlined, color: Color(0xFF86868B)),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -130,10 +133,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 autofillHints: const [AutofillHints.oneTimeCode],
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
+                  prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF86868B)),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      color: const Color(0xFF86868B),
                     ),
                     onPressed: () {
                       setState(() {
@@ -141,7 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       });
                     },
                   ),
-                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -150,16 +153,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
                 onPressed: _isLoading ? null : _handleLogin,
                 child: _isLoading
                     ? const SizedBox(
@@ -170,23 +165,26 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Colors.white,
                         ),
                       )
-                    : const Text(
-                        'Login',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
+                    : const Text('Login'),
               ),
               if (_firebaseError != null) ...[
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.shade200),
+                    color: const Color(0xFFFF3B30).withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFFF3B30).withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Text(
                     _firebaseError!,
-                    style: TextStyle(color: Colors.red.shade800),
+                    style: const TextStyle(
+                      color: Color(0xFFFF3B30),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),

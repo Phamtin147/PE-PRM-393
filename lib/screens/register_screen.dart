@@ -61,12 +61,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Registration successful'),
-          backgroundColor: Colors.green,
+          backgroundColor: Color(0xFF34C759),
           duration: Duration(seconds: 2),
         ),
       );
 
-      // Navigate to ListScreen after small delay so user/grader can see the message
+      // Delay so user/grader can see the message clearly
       await Future.delayed(const Duration(seconds: 2));
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
@@ -97,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         title: const Text('Register'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
         child: Form(
           key: _formKey,
           autovalidateMode: _submitted
@@ -106,20 +106,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 16),
-              Text(
+              const Text(
                 'Create an Account',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
-                    ),
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
+                  color: Color(0xFF1D1D1F),
+                ),
               ),
               const SizedBox(height: 8),
-              Text(
-                'Start organizing your personal book collection',
-                style: TextStyle(color: Colors.grey.shade600),
+              const Text(
+                'Start organizing your personal RecipeBox collection',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF6E6E73),
+                ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -128,8 +132,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 autofillHints: const [AutofillHints.oneTimeCode],
                 decoration: const InputDecoration(
                   labelText: 'Email',
-                  prefixIcon: Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email_outlined, color: Color(0xFF86868B)),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -151,10 +154,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 autofillHints: const [AutofillHints.oneTimeCode],
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
+                  prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF86868B)),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      color: const Color(0xFF86868B),
                     ),
                     onPressed: () {
                       setState(() {
@@ -162,7 +166,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       });
                     },
                   ),
-                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -183,10 +186,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 autofillHints: const [AutofillHints.oneTimeCode],
                 decoration: InputDecoration(
                   labelText: 'Confirm Password',
-                  prefixIcon: const Icon(Icons.lock_reset_outlined),
+                  prefixIcon: const Icon(Icons.lock_reset_outlined, color: Color(0xFF86868B)),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                      color: const Color(0xFF86868B),
                     ),
                     onPressed: () {
                       setState(() {
@@ -194,7 +198,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       });
                     },
                   ),
-                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -206,16 +209,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
                 onPressed: _isLoading ? null : _handleRegister,
                 child: _isLoading
                     ? const SizedBox(
@@ -226,31 +221,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: Colors.white,
                         ),
                       )
-                    : const Text(
-                        'Register',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
+                    : const Text('Register'),
               ),
               if (_successMessage != null) ...[
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green.shade300),
+                    color: const Color(0xFF34C759).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF34C759).withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.check_circle, color: Colors.green),
+                      const Icon(Icons.check_circle_outline, color: Color(0xFF34C759)),
                       const SizedBox(width: 8),
                       Text(
                         _successMessage!,
                         style: const TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          color: Color(0xFF34C759),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
                         ),
                       ),
                     ],
@@ -260,15 +254,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
               if (_firebaseError != null) ...[
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.shade200),
+                    color: const Color(0xFFFF3B30).withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFFF3B30).withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Text(
                     _firebaseError!,
-                    style: TextStyle(color: Colors.red.shade800),
+                    style: const TextStyle(
+                      color: Color(0xFFFF3B30),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
